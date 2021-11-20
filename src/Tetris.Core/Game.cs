@@ -7,7 +7,9 @@ namespace Tetris.Core
 {
     public class Game : Microsoft.Xna.Framework.Game
     {
-        public const int SCALE = 2;
+        public const int Height = 400;
+        public const int Width = 600;
+        public const int Scale = 2;
 
         private readonly GraphicsDeviceManager _graphics;
         private IScene _scene;
@@ -26,8 +28,8 @@ namespace Tetris.Core
 
         protected override void Initialize()
         {
-            _graphics.PreferredBackBufferWidth = 640 * SCALE;
-            _graphics.PreferredBackBufferHeight = 360 * SCALE;
+            _graphics.PreferredBackBufferWidth = Width * Scale;
+            _graphics.PreferredBackBufferHeight = Height * Scale;
             _graphics.IsFullScreen = false;
             _graphics.ApplyChanges();
 
