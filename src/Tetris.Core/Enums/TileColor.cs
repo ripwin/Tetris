@@ -1,6 +1,6 @@
 ﻿namespace Tetris.Core.Enums
 {
-    public enum BlockColor
+    public enum TileColor
     {
         Default,
         Cyan,

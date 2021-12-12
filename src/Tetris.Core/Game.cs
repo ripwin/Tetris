@@ -38,7 +38,7 @@ namespace Tetris.Core
 
         protected override void LoadContent()
         {
-            _scene = new GameScreen(this);
+            _scene = new StartScreen(this);
         }
 
         protected override void Update(GameTime gameTime)

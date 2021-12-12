@@ -1,9 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Tetris.Core.Entities;
 using Tetris.Core.Enums;
 using Tetris.Core.Graphics;
+using Tetris.Core.Systems;
 using Tetris.Core.Utils;
 
 namespace Tetris.Core.Scenes
@@ -18,13 +18,13 @@ namespace Tetris.Core.Scenes
         private readonly ContentManager _content;
         private readonly Input _input;
         private readonly SpriteBatch _spriteBatch;
-        private readonly TextureAtlas<BlockColor> _blockTextureAtlas;
+        private readonly TextureAtlas<TileColor> _blockTextureAtlas;
+
+        private readonly SpriteFont _font;
 
         private readonly Matrix _matrix;
 
-        private readonly BlockColor[] _tetris;
-
-        private readonly Tetrinos _tetrinos;
+        private readonly ISystem _boardSystem;
 
         public GameScreen(Game game)
         {
@@ -32,58 +32,38 @@ namespace Tetris.Core.Scenes
             _input = game.Input;
             _spriteBatch = new SpriteBatch(game.GraphicsDevice);
 
-            _blockTextureAtlas = new TextureAtlas<BlockColor>(_content.Load<Texture2D>("blocksTextureAtlas"));
-            _blockTextureAtlas.AddRegion(BlockColor.Default, new Rectangle(0, 0, UnitSize, UnitSize));
-            _blockTextureAtlas.AddRegion(BlockColor.Cyan, new Rectangle(UnitSize, 0, UnitSize, UnitSize));
-            _blockTextureAtlas.AddRegion(BlockColor.Blue, new Rectangle(UnitSize * 2, 0, UnitSize, UnitSize));
-            _blockTextureAtlas.AddRegion(BlockColor.Orange, new Rectangle(UnitSize * 3, 0, UnitSize, UnitSize));
-            _blockTextureAtlas.AddRegion(BlockColor.Yellow, new Rectangle(UnitSize * 4, 0, UnitSize, UnitSize));
-            _blockTextureAtlas.AddRegion(BlockColor.Green, new Rectangle(UnitSize * 5, 0, UnitSize, UnitSize));
-            _blockTextureAtlas.AddRegion(BlockColor.Violet, new Rectangle(UnitSize * 6, 0, UnitSize, UnitSize));
-            _blockTextureAtlas.AddRegion(BlockColor.Red, new Rectangle(UnitSize * 7, 0, UnitSize, UnitSize));
+            _blockTextureAtlas = new TextureAtlas<TileColor>(_content.Load<Texture2D>("blocksTextureAtlas"));
+            _blockTextureAtlas.AddRegion(TileColor.Default, new Rectangle(0, 0, UnitSize, UnitSize));
+            _blockTextureAtlas.AddRegion(TileColor.Cyan, new Rectangle(UnitSize, 0, UnitSize, UnitSize));
+            _blockTextureAtlas.AddRegion(TileColor.Blue, new Rectangle(UnitSize * 2, 0, UnitSize, UnitSize));
+            _blockTextureAtlas.AddRegion(TileColor.Orange, new Rectangle(UnitSize * 3, 0, UnitSize, UnitSize));
+            _blockTextureAtlas.AddRegion(TileColor.Yellow, new Rectangle(UnitSize * 4, 0, UnitSize, UnitSize));
+            _blockTextureAtlas.AddRegion(TileColor.Green, new Rectangle(UnitSize * 5, 0, UnitSize, UnitSize));
+            _blockTextureAtlas.AddRegion(TileColor.Violet, new Rectangle(UnitSize * 6, 0, UnitSize, UnitSize));
+            _blockTextureAtlas.AddRegion(TileColor.Red, new Rectangle(UnitSize * 7, 0, UnitSize, UnitSize));
 
             _matrix =
                 Matrix.CreateTranslation(0, 0, 0) *
                 Matrix.CreateRotationZ(0) *
                 Matrix.CreateScale(new Vector3(Game.Scale, Game.Scale, 1));
 
-            _tetris = new BlockColor[GridWidth * GridHeight];
+            _font = _content.Load<SpriteFont>("Score");
 
-            _tetrinos = new Tetrinos(_input, _blockTextureAtlas, _spriteBatch, TetriminosType.Z, UnitSize);
+            _boardSystem = new BoardSystem(game, _input, _blockTextureAtlas, _font, _spriteBatch, GridHeight, GridWidth, UnitSize);
         }
 
         public void Draw(GameTime gameTime)
         {
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _matrix);
 
-            var texture = _blockTextureAtlas.Texture();
-
-            for (int i = 0, index = 0; i < GridHeight; i++)
-            {
-                for (var j = 0; j < GridWidth; j++)
-                {
-                    var sourceRectangle = _blockTextureAtlas.GetRegion(_tetris[index]);
-
-                    _spriteBatch.Draw(
-                        texture,
-                        new Vector2(
-                            j * UnitSize,
-                            i * UnitSize),
-                        sourceRectangle,
-                        Color.White);
-
-                    index++;
-                }
-            }
-
-            _tetrinos.Draw(gameTime);
+            _boardSystem.Draw(gameTime);
 
             _spriteBatch.End();
         }
 
         public void Update(GameTime gameTime)
         {
-            _tetrinos.Update(gameTime);
+            _boardSystem.Update(gameTime);
         }
 
         public void Dispose()
